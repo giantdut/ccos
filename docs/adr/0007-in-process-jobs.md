@@ -1,0 +1,7 @@
+# ADR-0007 — Long jobs run in-process with persisted state, no external queue (v1)
+
+A Planning session's research phase and a Drafting pipeline step take minutes. They cannot fit inside a normal HTTP request/response. We run them as in-process async tasks inside the Next.js server (kicked off from the route handler, returned from immediately, written to a `jobs` table as they progress, streamed to the client via SSE). The Operator can close their browser tab and return; the partial output is in the database. Job state is the recovery point — if the container restarts mid-job, the job is marked `interrupted` and must be re-run, but the Operator sees that explicitly.
+
+We considered Redis + BullMQ (or equivalent) for queued workers, and durable-execution platforms (Inngest, Trigger.dev, Temporal) for step-level durability. We rejected both for v1 because ADR-0005 says single-Operator: there is no concurrency pressure, no fairness problem, no throughput requirement. The only resilience property that matters at this scale is "Operator can close their tab" — which the DB-backed job state already gives us. A queue adds Redis, a worker process, and another failure mode in exchange for resilience properties (retries across crashes, distributed workers) that v1 doesn't need.
+
+We graduate to a queue when (a) scheduled jobs appear (e.g., daily auto-research), or (b) container restarts during in-flight jobs become frequent enough to annoy the Operator.

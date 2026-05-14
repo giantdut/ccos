@@ -1,0 +1,30 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      OPERATOR_USER: ${OPERATOR_USER}
+      OPERATOR_PASS_HASH: ${OPERATOR_PASS_HASH}
+    depends_on:
+      - nextjs
+
+  nextjs:
+    build: .
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: /data/ccos.db
+    volumes:
+      - sqlite_data:/data
+
+volumes:
+  sqlite_data:
+  caddy_data:
+  caddy_config:
