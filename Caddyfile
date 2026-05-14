@@ -1,0 +1,6 @@
+:80 {
+    basicauth {
+        {env.OPERATOR_USER} {env.OPERATOR_PASS_HASH}
+    }
+    reverse_proxy nextjs:3000
+}

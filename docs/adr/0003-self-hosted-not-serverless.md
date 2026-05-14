@@ -1,0 +1,5 @@
+# ADR-0003 — CCOS runs as a containerised self-hosted app, not serverless
+
+The CCOS reasoning engine is the local `claude` CLI as described in the CCOS Manual — long-lived process, file-based memory (`.claude/`, `memory/`), MCP servers spawned alongside. We deploy the whole CCOS (Next.js frontend + thin backend wrapper that exec's `claude` + the filesystem state) as a single containerised app to a persistent host (Fly.io, Railway, or the Brand's own VPS). One deployment per client (consistent with ADR-0001).
+
+We considered Vercel because the frontend is Next.js and Vercel is the default pairing, but rejected it: Vercel's serverless model has hard execution timeouts, an ephemeral filesystem, and no way to host the `claude` CLI as a long-lived process. Adopting Vercel would have forced a rewrite to the Anthropic SDK and a relational/blob store — a genuinely different product that loses access to Claude Code's skills, agents, hooks, slash commands, and MCP lifecycle. We chose to stay close to the manual's architecture because reusing Claude Code's primitives is the entire point of building a CCOS.

@@ -1,0 +1,3 @@
+# ADR-0001 — CCOS is single-tenant
+
+The CCOS targets one **Brand** per install: brand voice, mission, and tone live in a single root `CLAUDE.md`, and every Operator on this install produces content for that one Brand. We considered multi-tenant (brand-per-Operator or brand-per-project) for a SaaS shape, but the manual's commercial framing is "build and sell a CCOS per client deployment," so the simpler shape matches how the product is sold. Going multi-tenant later would require introducing auth, brand profiles, per-tenant memory isolation, and a brand picker — a real refactor, but one we explicitly defer until a customer asks for it.
